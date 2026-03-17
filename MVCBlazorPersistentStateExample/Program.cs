@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Caching.Hybrid;
 using StackExchange.Redis;
 
@@ -15,6 +16,19 @@ var hybridCacheBuilder = builder.Services.AddHybridCache(opts =>
     };
 });
 
+string redisConnectionString = "CONNECTION_STRING_GOES_HERE";
+IConnectionMultiplexer redisConnection = ConnectionMultiplexer.Connect(redisConnectionString);
+
+builder.Services.AddSingleton(redisConnection);
+builder.Services.AddDataProtection()
+    .PersistKeysToStackExchangeRedis(redisConnection, $"DataProtection-Keys-{nameof(MVCBlazorPersistentStateExample)}")
+    .SetApplicationName(nameof(MVCBlazorPersistentStateExample));
+builder.Services.AddStackExchangeRedisCache(x =>
+{
+    x.InstanceName = nameof(MVCBlazorPersistentStateExample);
+    x.ConnectionMultiplexerFactory = () => Task.FromResult(redisConnection);
+});
+
 builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -27,7 +41,7 @@ var signalRBuilder = builder.Services.AddSignalR(options =>
 });
 
 signalRBuilder.AddStackExchangeRedis(
-    "CONNECTION_STRING_GOES_HERE",
+    redisConnectionString,
     redisOptions =>
     {
         redisOptions.Configuration.ChannelPrefix = RedisChannel.Literal(nameof(MVCBlazorPersistentStateExample));
