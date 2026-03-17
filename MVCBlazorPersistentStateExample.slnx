@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="BlazorAppPersistentStateExample/BlazorAppPersistentStateExample.csproj" Id="3bbc0568-aee4-48e6-830d-2df71ef7281d" />
   <Project Path="MVCBlazorPersistentStateExample/MVCBlazorPersistentStateExample.csproj" />
 </Solution>
